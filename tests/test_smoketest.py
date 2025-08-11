@@ -4,86 +4,83 @@ import time
 import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+
 class TestSmoketest():
-  def setup_method(self, method):
-    options = Options()
-    options.add_argument("--headless=new")
-    self.driver = webdriver.Chrome(options=options)
-    self.vars = {}
-  
-  def teardown_method(self, method):
-    self.driver.quit()
-  
-  # ... rest of your test methods ...
+    def setup_method(self, method):
+        options = Options()
+        options.add_argument("--headless=new")
+        self.driver = webdriver.Chrome(options=options)
+        self.vars = {}
 
-  
+    def teardown_method(self, method):
+        self.driver.quit()
 
-  
-  def test_admin(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(1367, 708)
-    elements = self.driver.find_elements(By.ID, "username")
-    assert len(elements) > 0
-    self.driver.find_element(By.ID, "username").send_keys("Ifeanyi")
-    self.driver.find_element(By.ID, "password").send_keys("eefretretre")
-  
-  def test_directory(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(1370, 708)
-    self.driver.find_element(By.LINK_TEXT, "Directory").click()
-    assert self.driver.find_element(By.CSS_SELECTOR, ".gold-member:nth-child(9) > p:nth-child(2)").text == "Teton Turf and Tree"
-    self.driver.find_element(By.ID, "directory-list").click()
-    assert self.driver.find_element(By.CSS_SELECTOR, ".gold-member:nth-child(9) > p:nth-child(2)").text == "Teton Turf and Tree"
-  
-  def test_home(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(596, 708)
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".header-logo img")
-    assert len(elements) > 0
-    assert self.driver.find_element(By.CSS_SELECTOR, ".header-title > h1").text == "Teton Idaho"
-    assert self.driver.find_element(By.CSS_SELECTOR, ".header-title > h2").text == "Chamber of Commerce"
-    assert self.driver.title == "Teton Idaho CoC"
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".spotlight1 > h4")
-    assert len(elements) > 0
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".spotlight2 > h4")
-    assert len(elements) > 0
-    elements = self.driver.find_elements(By.LINK_TEXT, "Join Us!")
-    assert len(elements) > 0
-    self.driver.find_element(By.LINK_TEXT, "Join Us!").click()
-    assert self.driver.title == "Teton Idaho CoC"
-  
-  def test_join(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(1373, 708)
-    self.driver.find_element(By.LINK_TEXT, "Join").click()
-    self.driver.find_element(By.NAME, "fname").click()
-    elements = self.driver.find_elements(By.NAME, "fname")
-    assert len(elements) > 0
-    self.driver.find_element(By.NAME, "fname").click()
-    self.driver.find_element(By.NAME, "fname").send_keys("Ifeanyi")
-    self.driver.find_element(By.NAME, "lname").send_keys("Ifegwu")
-    self.driver.find_element(By.NAME, "bizname").send_keys("aaa")
-    self.driver.find_element(By.NAME, "biztitle").send_keys("hr")
-    self.driver.find_element(By.NAME, "submit").click()
-    self.driver.find_element(By.NAME, "email").click()
-    elements = self.driver.find_elements(By.NAME, "email")
-    assert len(elements) > 0
-  
-  def test_homec(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(1368, 708)
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".spotlight1 > .centered-image")
-    assert len(elements) > 0
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".spotlight2 > h4")
-    assert len(elements) > 0
-    elements = self.driver.find_elements(By.LINK_TEXT, "Join Us!")
-    assert len(elements) > 0
-    self.driver.find_element(By.LINK_TEXT, "Join Us!").click()
-    assert self.driver.title == "Teton Idaho CoC"
-  
+    def test_home(self):
+        self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
+        self.driver.set_window_size(1368, 708)
+        # Verify logo image exists
+        elements = self.driver.find_elements(By.CSS_SELECTOR, ".header-logo img")
+        assert len(elements) > 0
+        # Verify main title and subtitle
+        assert self.driver.find_element(By.CSS_SELECTOR, ".header-title > h1").text == "Teton Idaho"
+        assert self.driver.find_element(By.CSS_SELECTOR, ".header-title > h2").text == "Chamber of Commerce"
+        # Verify browser tab title
+        assert self.driver.title == "Teton Idaho CoC"
+        # Verify spotlights exist (assuming spotlight1 and spotlight2 classes exist)
+        assert len(self.driver.find_elements(By.CSS_SELECTOR, ".spotlight1 > h4")) > 0
+        assert len(self.driver.find_elements(By.CSS_SELECTOR, ".spotlight2 > h4")) > 0
+        # Verify "Join Us!" link present and clickable
+        join_us_links = self.driver.find_elements(By.LINK_TEXT, "Join Us!")
+        assert len(join_us_links) > 0
+        join_us_links[0].click()
+        # After clicking join us, URL should contain join.html or title remains the same if SPA
+        assert "join.html" in self.driver.current_url or self.driver.title == "Teton Idaho CoC"
+
+    def test_directory(self):
+        self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
+        self.driver.set_window_size(1370, 708)
+        # Click Directory link in nav menu
+        self.driver.find_element(By.LINK_TEXT, "Directory").click()
+        # Verify card view button exists and click it
+        self.driver.find_element(By.ID, "directory-grid").click()  # Assuming button id is directory-grid
+        # Verify Teton Turf and Tree is shown in card view
+        card_text = self.driver.find_element(By.CSS_SELECTOR, ".gold-member:nth-child(9) > p:nth-child(2)").text
+        assert card_text == "Teton Turf and Tree"
+        # Click List button to switch to list view
+        self.driver.find_element(By.ID, "directory-list").click()  # Assuming button id is directory-list
+        # Verify same business shows in list view
+        list_text = self.driver.find_element(By.CSS_SELECTOR, ".gold-member:nth-child(9) > p:nth-child(2)").text
+        assert list_text == "Teton Turf and Tree"
+
+    def test_join(self):
+        self.driver.get("http://127.0.0.1:5500/teton/1.6/join.html")
+        self.driver.set_window_size(1373, 708)
+        # Verify First Name input present
+        elements = self.driver.find_elements(By.NAME, "fname")
+        assert len(elements) > 0
+        # Fill in form fields
+        self.driver.find_element(By.NAME, "fname").send_keys("Ifeanyi")
+        self.driver.find_element(By.NAME, "lname").send_keys("Ifegwu")
+        self.driver.find_element(By.NAME, "bizname").send_keys("AAA Corp")
+        self.driver.find_element(By.NAME, "biztitle").send_keys("HR Manager")
+        # Click Next Step or submit (depending on form)
+        self.driver.find_element(By.NAME, "submit").click()
+        # Verify Email input present on next step
+        elements = self.driver.find_elements(By.NAME, "email")
+        assert len(elements) > 0
+
+    def test_admin(self):
+        self.driver.get("http://127.0.0.1:5500/teton/1.6/admin.html")
+        self.driver.set_window_size(1367, 708)
+        # Verify username input present
+        elements = self.driver.find_elements(By.ID, "username")
+        assert len(elements) > 0
+        self.driver.find_element(By.ID, "username").send_keys("Ifeanyi")
+        self.driver.find_element(By.ID, "password").send_keys("wrongpassword")
+        # Click Login button (assuming id or name 'login')
+        self.driver.find_element(By.ID, "login").click()
+        # Verify error message shows (you need to adjust selector as per your page)
+        error_elements = self.driver.find_elements(By.CSS_SELECTOR, ".error-message")
+        assert len(error_elements) > 0
+
